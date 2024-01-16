@@ -1,6 +1,11 @@
 import RPi.GPIO as GPIO
 import time
 
+buzzer_pin = 11
+red_led_pin = 12
+blue_led_pin = 16
+
+
 characters = {
         "A": ".-",
         "B": "-...",
@@ -40,12 +45,12 @@ characters = {
         "0": "-----"
     }
 
-led_pin = 11
-
 def setup():
-    GPIO.setmode(GPIO.BOARD)  # Physical GPIO Numbering
-    GPIO.setup(led_pin, GPIO.OUT) # set pin 11 or led_pin to be an output
-    GPIO.output(led_pin, GPIO.LOW) # as a LED is either high/on or low/off - sets to start as off
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(buzzer_pin, GPIO.OUT)
+    GPIO.output(buzzer_pin, GPIO.LOW)
+    GPIO.setup(red_led_pin, GPIO.OUT)
+    GPIO.setup(blue_led_pin, GPIO.OUT)
 
 def loop():
     while True:
@@ -60,32 +65,32 @@ def loop():
                 break
             else: continue
         for char in msg.upper():
+            led = red_led_pin
             delay = .2
-            if char == ' ': time.sleep(1)
+            if char == ' ': time.sleep(.5)
             if char in characters.keys():
                 # print(characters[char], char)
                 for i in characters[char]:
                     #print(i)
-                    delay = .1 if i == "." else .3
+                    delay = .1 if i == "." else .2
+                    led = red_led_pin if i == "." else blue_led_pin
                     #print(delay)
-                    GPIO.output(led_pin, GPIO.HIGH)
+                    GPIO.output(buzzer_pin, GPIO.HIGH)
+                    GPIO.output(led, GPIO.HIGH)
                     time.sleep(delay)
-                    GPIO.output(led_pin, GPIO.LOW)
+                    GPIO.output(buzzer_pin, GPIO.LOW)
+                    GPIO.output(led, GPIO.LOW)
                     time.sleep(.1)
                 time.sleep(.2)
 
 def destroy():
-    GPIO.cleanup() # Releases all GPIO
+    GPIO.cleanup()
 
-
-
-
-if __name__ == "__main__":
-    print("Starting Morse Code Translator...\n")
+if __name__ == '__main__':
+    print('running')
     setup()
     try:
         loop()
-    except KeyboardInterrupt:  # ctrl-c to end program
+    except KeyboardInterrupt:
         destroy()
-
 

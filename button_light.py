@@ -2,7 +2,6 @@ import RPi.GPIO as GPIO
 
 ledPin = 11
 buttonPin = 12
-ledState = False
 
 def setup():
     GPIO.setmode(GPIO.BOARD)
@@ -10,17 +9,14 @@ def setup():
     GPIO.output(ledPin, GPIO.LOW)
     GPIO.setup(buttonPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-def buttonEvent(channel):
-    global ledState
-    print(f'buttonevent {channel}')
-    ledState = not ledState
-    print('on') if ledState else print('off')
-    GPIO.output(ledPin, ledState)
-
 def loop():
-    GPIO.add_event_detect(buttonPin, GPIO.falling, callback = buttonEvent, bouncetime=300)
     while True:
-        pass
+        if GPIO.input(buttonPin) == GPIO.LOW:
+            GPIO.output(ledPin, GPIO.HIGH)
+            print("Button Pressed")
+        else:
+            GPIO.output(ledPin, GPIO.LOW)
+            print("Button Released")
 
 def destroy():
     GPIO.cleanup()
