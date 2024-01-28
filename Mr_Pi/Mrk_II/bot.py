@@ -1,24 +1,35 @@
 import RPi.GPIO as GPIO
 import time
-import threading
+from datetime import datetime
+# import threading
 import sys
 from pyPS4Controller.controller import Controller
+from picamera2 import Picamera2
+from picamera2.encoders import H264Encoder
+from picamera2.outputs import FfmpegOutput
 
 
 # ++++++++++++++++++
 # Constant Variable
 # ++++++++++++++++++
 # Left Motor
-motor_A1 = 11
-motor_A2 = 13
+motor_A1 = 13
+motor_A2 = 11
 motor_AE = 15
 # Right Motor
-motor_B1 = 16
+motor_B1 = 22
 motor_B2 = 18
-motor_BE = 22
+motor_BE = 16
 # Servo - in future run on own power supply,
         # may crash Mr Pi.
 servo_pin = 29
+
+picam2 = Picamera2()
+video_config = picam2.create_video_configuration()
+picam2.configure(video_config)
+
+encoder = H264Encoder(10000000)
+
 
 
 
@@ -92,7 +103,7 @@ class MyController(Controller):
     def __init__(self, **kwargs):
         Controller.__init__(self, **kwargs)
         self.spos = 7
-        self.scanning = True
+        self.recording = False
     
     def on_L3_up(self, value):
         print('L Track FWD')
@@ -135,8 +146,14 @@ class MyController(Controller):
         destroy()
         
     def on_x_press(self):
-        self.scanning = not self.scanning
-        print('Scanning:', self.scanning)
+        self.recording = not self.recording
+        print('recording:', self.recording)
+        date = datetime.now()
+        output = FfmpegOutput(f'vid_{date.hour}_{date.minute}_{date.second}.mp4')
+        if self.recording:
+            picam2.start_recording(encoder, output)
+        else:
+            picam2.stop_recording()
     
     def on_left_arrow_press(self):
         self.spos += 1
@@ -162,13 +179,13 @@ class MyController(Controller):
 # Excute Program
 # +++++++++++++++
 if __name__ == '__main__':
-    print('Hello Pi...')
-    setup_thread = threading.Thread(target=setup, daemon=True)
-    scan_thread = threading.Thread(target=scan, daemon=True)
-    setup_thread.start()
-    scan_thread.start()
-    time.sleep(0.5)
-    scan_thread.join()
-    scan_thread.join()
+    print('My name is Optimus...')
+    setup()
+    # setup_thread = threading.Thread(target=setup)
+    # scan_thread = threading.Thread(target=scan)
+    # setup_thread.start()
+    # scan_thread.start()
+    # setup_thread.join()
+    # scan_thread.join()
 
         
