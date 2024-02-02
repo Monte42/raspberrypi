@@ -39,7 +39,7 @@ picam2.configure(video_config)
 encoder = H264Encoder(10000000)
 memory_bank = []
 
-DUTY = 95
+DUTY = 100
 
 
 # ++++++++++++++++
@@ -131,31 +131,30 @@ def scan():
         action = step(observation) 
         observation.append(action)
         memory_bank.append(observation)
-        # print(memory_bank)
 
 def step(observation): # replace observation with action returned from agent
     r = sum(observation[:7]) / 7
     c = sum(observation[5:-5]) / 5 # remove all vars
     l = sum(observation[-7:]) / 7
     current_action = 0
-    if c <= 20: # check action value
+    if c <= 18: # check action value
         action((GPIO.LOW, GPIO.HIGH, DUTY), (GPIO.HIGH, GPIO.LOW, DUTY))
         current_action = 5
         print(180)
-    elif l <= 44:
+    elif l <= 40:
         action((GPIO.LOW, GPIO.LOW, 0), (GPIO.HIGH, GPIO.LOW, DUTY))
         print('turn hard left')
         current_action = 2
-    elif l <= 60:
-        action((GPIO.HIGH, GPIO.LOW, (DUTY+5)/2), (GPIO.HIGH, GPIO.LOW, DUTY))
+    elif l <= 55:
+        action((GPIO.HIGH, GPIO.LOW, DUTY*.7), (GPIO.HIGH, GPIO.LOW, DUTY))
         print('turn left')
         current_action = 1
-    elif r <= 45:
+    elif r <= 40:
         action((GPIO.HIGH, GPIO.LOW, DUTY), (GPIO.LOW, GPIO.LOW, 0))
         print('turn hard right')
         current_action = 4
-    elif r <= 60:
-        action((GPIO.HIGH, GPIO.LOW, DUTY), (GPIO.HIGH, GPIO.LOW, (DUTY+5)/2))
+    elif r <= 55:
+        action((GPIO.HIGH, GPIO.LOW, DUTY), (GPIO.HIGH, GPIO.LOW, DUTY*.7))
         print('turn right')
         current_action = 3
     else:
@@ -195,16 +194,6 @@ def destroy():
 # ++++++++
 # CLASSES
 # ++++++++
-# sudo bluetoothctl
-# agent on
-# defalut-agent
-# scan on
-# scan off
-# pair {device id}
-# connent {device id}
-# trust {device id}
-# exit
-
 class MyController(Controller):
     def __init__(self, **kwargs):
         Controller.__init__(self, **kwargs)
@@ -212,18 +201,6 @@ class MyController(Controller):
         self.r_track = 0
         self.spos = 7
         self.recording = False
-    
-    # def extract_track_data(self):
-    #     action = 0
-    #     if self.l_track > 0. and self.r_track > 0.: action = 1
-    #     if self.l_track > 0. and self.r_track == 0.: action = 2
-    #     if self.l_track == 0. and self.r_track > 0.: action = 3
-    #     if self.l_track < 0. and self.r_track < 0.: action = 4
-    #     if self.l_track < 0. and self.r_track == 0.: action = 5
-    #     if self.l_track == 0. and self.r_track < 0.: action = 6
-    #     if self.l_track > 0. and self.r_track < 0.: action = 7
-    #     if self.l_track < 0. and self.r_track > 0.: action = 8
-    #     return action
     
     # FORWARD
     # ========
@@ -269,6 +246,8 @@ class MyController(Controller):
         self.r_track = duty * -1
         motor_BE_P.ChangeDutyCycle(duty)
     
+    # RECORD
+    # =======
     def on_x_press(self):
         self.recording = not self.recording
         print('recording:', self.recording)
@@ -287,34 +266,6 @@ class MyController(Controller):
 
 
 
-    # TEST AREA
-    # =========
-    # def on_left_arrow_press(self):
-    #     self.spos += .5
-    #     print(self.spos)
-    #     if self.spos > 12: self.spos = 12
-    #     servo_P.ChangeDutyCycle(self.spos)
-    #     time.sleep(.05)
-    #     servo_P.ChangeDutyCycle(0)
-    # def on_right_arrow_press(self):
-    #     self.spos -= .5
-    #     print(self.spos)
-    #     if self.spos < 2: self.spos = 2
-    #     servo_P.ChangeDutyCycle(self.spos)
-    #     time.sleep(.05)
-    #     servo_P.ChangeDutyCycle(0)
-    # def on_circle_press(self):
-    #     self.spos = 7
-    #     servo_P.ChangeDutyCycle(self.spos)
-    #     time.sleep(.05)
-    #     servo_P.ChangeDutyCycle(0)
-    
-    # def on_L2_press(self, value):
-    #     scan()
-    # def on_square_press(self):
-    #     distance = get_pulse_distance()
-    #     print(f'Current range at servo pos {self.spos} is {distance}')
-
 # +++++++++++++++
 # Excute Program
 # +++++++++++++++
@@ -327,3 +278,5 @@ if __name__ == '__main__':
     scan_thread.start()
     setup_thread.join()
     scan_thread.join()
+
+        
