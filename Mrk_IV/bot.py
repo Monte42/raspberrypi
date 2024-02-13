@@ -21,7 +21,7 @@ servo_pin = 29
 trigger = 33
 echo = 31
 
-DUTY = 100
+DUTY = 60
 MAX_DISTANCE = 220
 time_out = MAX_DISTANCE * 60
 
@@ -139,7 +139,7 @@ class Agent(RandomForestClassifier):
         GPIO.output(motor_B2, right_motor[1])
         motor_AE_P.ChangeDutyCycle(left_motor[2])
         motor_BE_P.ChangeDutyCycle(right_motor[2])
-        if sleep: time.sleep(1.5)
+        if sleep: time.sleep(1)
     
     def step(self, act):
         act = guy.predict(act)[0]
